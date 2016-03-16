@@ -13,6 +13,13 @@ try:
 except IndexError:
     print 'Error: use first argument as key'
 
+show_nick = False
+try:
+    if str(sys.argv[2]) == '-n':
+        show_nick = True
+except IndexError:
+    pass
+
 
 def timezone_sort(s):
     return int(s['tz_offset'])
@@ -36,6 +43,7 @@ timezones = []
 for member in slack_members:
     tz = {
             'user_id': member['id'],
+            'nickname': member['name'],
             'tz_offset': member['tz_offset'],
             'tz': member['tz']
         }
@@ -65,21 +73,32 @@ if slack_client.rtm_connect():
                                          else str(user_timezone['tz_offset'])[1:])
 
                     if user_timezone['tz'] not in show_timezones and user_timezone['tz'] is not None:
-                        show_timezones[user_timezone['tz']] = \
-                            (initial_utc + timedelta(seconds=utc_user_delta)).strftime("%d %H:%M")
+                        show_timezones[user_timezone['tz']] = (
+                            (initial_utc + timedelta(seconds=utc_user_delta)).strftime("%d %H:%M"),
+                        )
+                    if user_timezone['tz'] in show_timezones and show_nick:
+                        show_timezones[user_timezone['tz']] += (user_timezone['nickname'],)
 
                 show_timezones = OrderedDict(sorted(show_timezones.items(), key=itemgetter(1)))
-
                 msg = ''
-                for zone, localtime in show_timezones.iteritems():
+                for local_tz, info in show_timezones.iteritems():
+                    localtime = info[0]
                     localtime = localtime[3:]
-                    msg += prepare_emoji(localtime) + ' ' + localtime + ' `' + zone + '` \n'
+                    msg += prepare_emoji(localtime) + ' ' + localtime + ' `' + local_tz + '`'
+
+                    if show_nick:
+                        msg += ' - `'
+                        for nick in info[1:]:
+                            msg += nick + ', '
+                        msg = msg[:-2] + '`'
+
+                    msg += ' \n'
 
                 slack_client.api_call(
                     "chat.postMessage", channel=message_object[0]['channel'], text=msg,
                     username='time_bot', icon_emoji=':timer_clock:'
                 )
-            except Exception:
+            except Exception :
                 # prevent stopping script
                 pass
 

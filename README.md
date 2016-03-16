@@ -9,6 +9,7 @@ teammates time and timezones based on localtime of sender message.
 * download or clone repo
 * setup requirements : pip install -r requirements.txt (virtualenv is recommended)
 * run command : python slack-timezone-py.py YOUR_SLACK_TOKEN
+* if you want to see teammate nicknames near timeze please add '-n' : python slack-timezone-py.py YOUR_SLACK_TOKEN -n
 
 Inspired by
 * https://github.com/caiosba/slack-timezone-converter
