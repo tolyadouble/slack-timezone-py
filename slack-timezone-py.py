@@ -57,7 +57,7 @@ if slack_client.rtm_connect():
                 initial_time = datetime.strptime(re.findall(r"\d+:\d+", message_text)[0], '%H:%M')
                 utc_delta = int(user_object['tz_offset'] if str(user_object['tz_offset'])[:1] != '+'
                                 else str(user_object['tz_offset'])[1:])
-                initial_utc = initial_time - timedelta(seconds=utc_delta)
+                initial_utc = initial_time - timedelta(seconds=utc_delta) + timedelta(days=1)
 
                 show_timezones = {}
                 for user_timezone in timezones:
