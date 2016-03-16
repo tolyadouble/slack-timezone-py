@@ -82,8 +82,7 @@ if slack_client.rtm_connect():
                 show_timezones = OrderedDict(sorted(show_timezones.items(), key=itemgetter(1)))
                 msg = ''
                 for local_tz, info in show_timezones.iteritems():
-                    localtime = info[0]
-                    localtime = localtime[3:]
+                    localtime = info[0][3:]
                     msg += prepare_emoji(localtime) + ' ' + localtime + ' `' + local_tz + '`'
 
                     if show_nick:
