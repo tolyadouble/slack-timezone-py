@@ -15,7 +15,7 @@ pip install -r requirements.txt
 <pre>
 python slack-timezone-py.py YOUR_SLACK_TOKEN
 </pre>
-* if you want to see teammate nicknames near timeze please add '-n' :
+* if you want to see teammate nicknames near timezone please add '-n' :
 <pre>
 python slack-timezone-py.py YOUR_SLACK_TOKEN -n
 </pre>
