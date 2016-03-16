@@ -7,7 +7,7 @@ teammates time and timezones based on localtime of sender message.
 
 ## Usage
 * download or clone repo
-* setup requirements : pip install -r requirements.txt
+* setup requirements : pip install -r requirements.txt (virtualenv is recommended)
 * run command : python slack-timezone-py.py YOUR_SLACK_TOKEN
 
 Inspired by
@@ -17,3 +17,4 @@ Inspired by
 
 * https://api.slack.com/web#basics
 * https://api.slack.com/rtm
+* https://github.com/slackhq/python-slackclient
