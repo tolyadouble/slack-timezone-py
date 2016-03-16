@@ -1,0 +1,88 @@
+import sys
+import requests
+import json
+import time
+import re
+from operator import itemgetter
+from collections import OrderedDict
+from datetime import datetime, timedelta
+from slackclient import SlackClient
+
+try:
+    TOKEN = str(sys.argv[1])
+except IndexError:
+    print 'Error: use first argument as key'
+
+
+def timezone_sort(s):
+    return int(s['tz_offset'])
+
+
+def prepare_emoji(localtime):
+    hours = str(localtime[:2])
+    if hours == '00':
+        hours = '12'
+    if hours[:1] == '0':
+        hours = hours[1:]
+    if int(hours) > 12:
+        hours = int(hours) - 12
+    return ':clock' + str(hours) + ':'
+
+# Get users timezones
+response = requests.get("https://slack.com/api/users.list?token=%s&pretty=1" % TOKEN)
+slack_members = json.loads(response.text)['members']
+timezones = []
+
+for member in slack_members:
+    tz = {
+            'user_id': member['id'],
+            'tz_offset': member['tz_offset'],
+            'tz': member['tz']
+        }
+    timezones.append(tz)
+
+timezones = sorted(timezones, key=timezone_sort)
+
+slack_client = SlackClient(TOKEN)
+
+# Listen message event
+if slack_client.rtm_connect():
+    while True:
+        message_object = slack_client.rtm_read()
+        if len(message_object) > 0 and 'text' in message_object[0]:
+            try:
+                message_text = message_object[0]['text']
+                user_object = [m for m in timezones if m['user_id'] == message_object[0]['user']][0]
+                initial_tz = user_object['tz']
+                initial_time = datetime.strptime(re.findall(r"\d+:\d+", message_text)[0], '%H:%M')
+                utc_delta = int(user_object['tz_offset'] if str(user_object['tz_offset'])[:1] != '+'
+                                else str(user_object['tz_offset'])[1:])
+                initial_utc = initial_time - timedelta(seconds=utc_delta)
+
+                show_timezones = {}
+                for user_timezone in timezones:
+                    utc_user_delta = int(user_timezone['tz_offset'] if str(user_timezone['tz_offset'])[:1] != '+'
+                                         else str(user_timezone['tz_offset'])[1:])
+
+                    if user_timezone['tz'] not in show_timezones and user_timezone['tz'] is not None:
+                        show_timezones[user_timezone['tz']] = \
+                            (initial_utc + timedelta(seconds=utc_user_delta)).strftime("%d %H:%M")
+
+                show_timezones = OrderedDict(sorted(show_timezones.items(), key=itemgetter(1)))
+
+                msg = ''
+                for zone, localtime in show_timezones.iteritems():
+                    localtime = localtime[3:]
+                    msg += prepare_emoji(localtime) + ' ' + localtime + ' `' + zone + '` \n'
+
+                slack_client.api_call(
+                    "chat.postMessage", channel=message_object[0]['channel'], text=msg,
+                    username='time_bot', icon_emoji=':timer_clock:'
+                )
+            except Exception:
+                # prevent stopping script
+                pass
+
+        time.sleep(1)
+else:
+    print "Connection Failed"
