@@ -59,6 +59,7 @@ if slack_client.rtm_connect():
         message_object = slack_client.rtm_read()
         if len(message_object) > 0 and 'text' in message_object[0]:
             try:
+                initial_time = ''
                 message_text = message_object[0]['text']
                 user_object = [m for m in timezones if m['user_id'] == message_object[0]['user']][0]
                 initial_tz = user_object['tz']
@@ -74,13 +75,16 @@ if slack_client.rtm_connect():
 
                 # try to find '#time' string
                 try:
-                    if re.findall(r"#time", message_text)[0]:
+                    if re.findall(r"#time", message_text)[0] == '#time':
                         ts = float(message_object[0]['ts'])
                         ts = (datetime.utcfromtimestamp(ts) + timedelta(seconds=utc_delta)).strftime('%H:%M')
                         initial_time = datetime.strptime(ts, '%H:%M')
                 except:
                     # prevent no time spam
                     pass
+
+                if not initial_time:
+                    raise Exception('No', 'Time')
 
                 initial_utc = initial_time - timedelta(seconds=utc_delta) + timedelta(days=1)
 
