@@ -65,7 +65,8 @@ if slack_client.rtm_connect():
 
                 # try to find H:M time
                 try:
-                    initial_time = datetime.strptime(re.findall(r"\d+:\d+", message_text)[0], '%H:%M')
+                    initial_time = datetime.strptime(re.findall(r"\d+:\d+", message_text)[0],
+                                                     '%H:%M')
                 except:
                     # prevent no time spam
                     pass
@@ -73,7 +74,8 @@ if slack_client.rtm_connect():
                 # try to find '#time' string
                 try:
                     if re.findall(r"#time", message_text)[0]:
-                        initial_time = datetime.strptime(datetime.now().strftime('%H:%M'), '%H:%M')
+                        initial_time = datetime.strptime(datetime.fromtimestamp(float(message_object[0]['ts']))
+                                                         .strftime('%H:%M'), '%H:%M')
                 except:
                     # prevent no time spam
                     pass
