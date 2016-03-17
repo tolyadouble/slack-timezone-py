@@ -2,6 +2,7 @@
 
 Convert string with time to your teammates time and timezone. If someone write time like - 22:00, slackbot show all
 teammates time and timezones based on localtime of sender message.
+* added feature to show timezones based on your current time, just type : #time
 
 ![Screenshot](image.png?raw=true "Screenshot")
 

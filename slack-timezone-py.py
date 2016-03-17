@@ -62,7 +62,22 @@ if slack_client.rtm_connect():
                 message_text = message_object[0]['text']
                 user_object = [m for m in timezones if m['user_id'] == message_object[0]['user']][0]
                 initial_tz = user_object['tz']
-                initial_time = datetime.strptime(re.findall(r"\d+:\d+", message_text)[0], '%H:%M')
+
+                # try to find H:M time
+                try:
+                    initial_time = datetime.strptime(re.findall(r"\d+:\d+", message_text)[0], '%H:%M')
+                except:
+                    # prevent no time spam
+                    pass
+
+                # try to find '#time' string
+                try:
+                    if re.findall(r"#time", message_text)[0]:
+                        initial_time = datetime.strptime(datetime.now().strftime('%H:%M'), '%H:%M')
+                except:
+                    # prevent no time spam
+                    pass
+
                 utc_delta = int(user_object['tz_offset'] if str(user_object['tz_offset'])[:1] != '+'
                                 else str(user_object['tz_offset'])[1:])
                 initial_utc = initial_time - timedelta(seconds=utc_delta) + timedelta(days=1)
@@ -97,7 +112,7 @@ if slack_client.rtm_connect():
                     "chat.postMessage", channel=message_object[0]['channel'], text=msg,
                     username='time_bot', icon_emoji=':timer_clock:'
                 )
-            except Exception :
+            except:
                 # prevent stopping script
                 pass
 
