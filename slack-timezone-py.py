@@ -33,7 +33,7 @@ def prepare_emoji(localtime):
         hours = hours[1:]
     if int(hours) > 12:
         hours = int(hours) - 12
-    return ':clock' + str(hours) + ':'
+    return ':clock%s:' % str(hours)
 
 # Get users timezones
 response = requests.get("https://slack.com/api/users.list?token=%s&pretty=1" % TOKEN)
@@ -83,12 +83,12 @@ if slack_client.rtm_connect():
                 msg = ''
                 for local_tz, info in show_timezones.iteritems():
                     localtime = info[0][3:]
-                    msg += prepare_emoji(localtime) + ' ' + localtime + ' `' + local_tz + '`'
+                    msg += '%s %s `%s`' % (prepare_emoji(localtime), localtime, local_tz)
 
                     if show_nick:
                         msg += ' - `'
                         for nick in info[1:]:
-                            msg += nick + ', '
+                            msg += '%s, ' % nick
                         msg = msg[:-2] + '`'
 
                     msg += ' \n'
