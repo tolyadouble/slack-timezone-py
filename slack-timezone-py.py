@@ -41,12 +41,16 @@ slack_members = json.loads(response.text)['members']
 timezones = []
 
 for member in slack_members:
-    tz = {
-            'user_id': member['id'],
-            'nickname': member['name'],
-            'tz_offset': member['tz_offset'],
-            'tz': member['tz']
-        }
+    try:
+        tz = {
+                'user_id': member['id'],
+                'nickname': member['name'],
+                'tz_offset': member['tz_offset'],
+                'tz': member['tz']
+            }
+    except KeyError:
+        # skip users without timezone
+        pass
     timezones.append(tz)
 
 timezones = sorted(timezones, key=timezone_sort)
