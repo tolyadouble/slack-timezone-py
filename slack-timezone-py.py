@@ -11,12 +11,12 @@ from slackclient import SlackClient
 try:
     TOKEN = str(sys.argv[1])
 except IndexError:
-    print 'Error: use first argument as key'
+    raise ValueError('Error: use first argument as key')
 
-show_nick = False
+show_nickname = False
 try:
     if str(sys.argv[2]) == '-n':
-        show_nick = True
+        show_nickname = True
 except IndexError:
     pass
 
@@ -101,7 +101,7 @@ if slack_client.rtm_connect():
                         show_timezones[user_timezone['tz']] = (
                             (initial_utc + timedelta(seconds=utc_user_delta)).strftime("%d %H:%M"),
                         )
-                    if user_timezone['tz'] in show_timezones and show_nick:
+                    if user_timezone['tz'] in show_timezones and show_nickname:
                         show_timezones[user_timezone['tz']] += (user_timezone['nickname'],)
 
                 show_timezones = OrderedDict(sorted(show_timezones.items(), key=itemgetter(1)))
@@ -110,7 +110,7 @@ if slack_client.rtm_connect():
                     localtime = info[0][3:]
                     msg += '%s %s `%s`' % (prepare_emoji(localtime), localtime, local_tz)
 
-                    if show_nick:
+                    if show_nickname:
                         msg += ' - `'
                         for nick in set(info[1:]):
                             msg += '%s, ' % nick
