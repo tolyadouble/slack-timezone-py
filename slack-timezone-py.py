@@ -112,7 +112,7 @@ if slack_client.rtm_connect():
 
                     if show_nick:
                         msg += ' - `'
-                        for nick in info[1:]:
+                        for nick in set(info[1:]):
                             msg += '%s, ' % nick
                         msg = msg[:-2] + '`'
 
